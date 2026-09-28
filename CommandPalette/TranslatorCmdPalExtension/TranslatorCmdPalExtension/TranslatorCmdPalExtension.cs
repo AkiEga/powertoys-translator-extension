@@ -1,0 +1,39 @@
+// Copyright (c) Microsoft Corporation
+// The Microsoft Corporation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System;
+using System.Runtime.InteropServices;
+using System.Threading;
+using Microsoft.CommandPalette.Extensions;
+using Translator;
+
+namespace TranslatorCmdPalExtension;
+
+[Guid("d0b8c310-ad09-4ba5-9df7-80f7b2c633cc")]
+public sealed partial class TranslatorCmdPalExtension : IExtension, IDisposable
+{
+    private readonly ManualResetEvent _extensionDisposedEvent;
+
+    private readonly TranslatorCmdPalExtensionCommandsProvider _provider = new();
+
+    public TranslatorCmdPalExtension(ManualResetEvent extensionDisposedEvent)
+    {
+        this._extensionDisposedEvent = extensionDisposedEvent;
+    }
+
+    public object? GetProvider(ProviderType providerType)
+    {
+        return providerType switch
+        {
+            ProviderType.Commands => _provider,
+            _ => null,
+        };
+    }
+
+    public void Dispose()
+    {
+        TranslationClient.Dispose();
+        _extensionDisposedEvent.Set();
+    }
+}

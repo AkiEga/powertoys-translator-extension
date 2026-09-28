@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "TranslatorCmdPalExtension (Package)": {
+      "commandName": "MsixPackage",
+      "doNotLaunchApp": true
+    },
+    "TranslatorCmdPalExtension (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
