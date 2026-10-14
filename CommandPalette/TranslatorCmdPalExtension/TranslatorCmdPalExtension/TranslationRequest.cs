@@ -4,7 +4,7 @@ public sealed record TranslationRequest(string Text, string Source, string Targe
 {
     public static TranslationRequest Parse(string search)
     {
-        var text = search.Trim();
+        var text = search.Trim().Normalize(System.Text.NormalizationForm.FormKC);
         string? target = null;
 
         if (text.StartsWith("ja:", StringComparison.OrdinalIgnoreCase))

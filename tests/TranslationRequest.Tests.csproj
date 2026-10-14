@@ -7,5 +7,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\CommandPalette\TranslatorCmdPalExtension\TranslatorCmdPalExtension\TranslationRequest.cs" Link="TranslationRequest.cs" />
+    <Compile Include="..\CommandPalette\TranslatorCmdPalExtension\TranslatorCmdPalExtension\DictionaryIndex.cs" Link="DictionaryIndex.cs" />
+    <Compile Include="..\CommandPalette\TranslatorCmdPalExtension\TranslatorCmdPalExtension\DictionaryClient.cs" Link="DictionaryClient.cs" />
   </ItemGroup>
 </Project>

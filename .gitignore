@@ -2,3 +2,8 @@
 **/obj/
 **/node_modules/
 **/AppPackages/
+**/Data/JMdict_e.gz
+**/Data/EDRDG-LICENCE.html
+**/Data/JMdict-documentation.html
+**/Data/CC-BY-SA-4.0.txt
+**/Data/*.download

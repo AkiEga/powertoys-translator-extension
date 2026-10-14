@@ -6,7 +6,6 @@ using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.CommandPalette.Extensions;
-using Translator;
 
 namespace TranslatorCmdPalExtension;
 
@@ -33,7 +32,6 @@ public sealed partial class TranslatorCmdPalExtension : IExtension, IDisposable
 
     public void Dispose()
     {
-        TranslationClient.Dispose();
         _extensionDisposedEvent.Set();
     }
 }

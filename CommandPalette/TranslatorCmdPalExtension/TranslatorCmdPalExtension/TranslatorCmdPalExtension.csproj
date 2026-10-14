@@ -24,16 +24,18 @@
     <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
     <Content Include="Assets\StoreLogo.png" />
     <Content Include="Assets\Wide310x150Logo.scale-200.png" />
-    <Content Include="worker\worker.mjs" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="worker\package.json" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="worker\node_modules\**\*" Exclude="worker\node_modules\.package-lock.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Data\**\*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
     <Manifest Include="$(ApplicationManifest)" />
-    <None Remove="worker\package-lock.json" />
-    <None Remove="worker\node_modules\**\*" />
+    <None Remove="Data\**\*" />
   </ItemGroup>
+
+  <Target Name="CheckDictionaryData" BeforeTargets="PrepareForBuild">
+    <Error Condition="!Exists('Data\JMdict_e.gz') Or !Exists('Data\EDRDG-LICENCE.html') Or !Exists('Data\JMdict-documentation.html') Or !Exists('Data\CC-BY-SA-4.0.txt')"
+           Text="Dictionary data or licence files are missing. Run download-dictionary.ps1 from the repository root before building." />
+  </Target>
 
   <!--
     Defining the "Msix" ProjectCapability here allows the Single-project MSIX Packaging

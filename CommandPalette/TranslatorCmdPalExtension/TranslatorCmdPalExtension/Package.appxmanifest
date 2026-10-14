@@ -11,7 +11,7 @@
   <Identity
     Name="TranslatorCmdPalExtension"
     Publisher="CN=AkiEga"
-    Version="1.0.0.0" />
+    Version="2.0.0.0" />
   <!-- When you're ready to publish your extension, you'll need to change the
        Publisher= to match your own identity -->
 
@@ -74,7 +74,6 @@
   </Applications>
 
   <Capabilities>
-    <Capability Name="internetClient" />
     <rescap:Capability Name="runFullTrust" />
   </Capabilities>
 </Package>

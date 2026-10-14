@@ -10,14 +10,15 @@ namespace TranslatorCmdPalExtension;
 
 internal sealed partial class TranslatorCmdPalExtensionPage : DynamicListPage
 {
-    private IListItem[] _items = [new ListItem(new NoOpCommand()) { Title = "日本語または英語を入力してください", Subtitle = "ja: / en: で翻訳先を指定できます" }];
+    private const string Attribution = "JMdict © EDRDG | CC BY-SA 4.0";
+    private IListItem[] _items = [new ListItem(new NoOpCommand()) { Title = "日本語または英語の単語を入力してください", Subtitle = Attribution }];
     private int _queryVersion;
 
     public TranslatorCmdPalExtensionPage()
     {
         Icon = IconHelpers.FromRelativePath("Assets\\StoreLogo.png");
         Title = "JP ↔ EN Translator";
-        Name = "Translate";
+        Name = "Look up";
     }
 
     public override IListItem[] GetItems() => _items;
@@ -29,24 +30,24 @@ internal sealed partial class TranslatorCmdPalExtensionPage : DynamicListPage
         if (request.Text.Length == 0)
         {
             IsLoading = false;
-            _items = [new ListItem(new NoOpCommand()) { Title = "日本語または英語を入力してください", Subtitle = "ja: / en: で翻訳先を指定できます" }];
+            _items = [new ListItem(new NoOpCommand()) { Title = "日本語または英語の単語を入力してください", Subtitle = $"ja: / en: で検索方向を指定 | {Attribution}" }];
         }
         else if (request.Text.Length > 500)
         {
             IsLoading = false;
-            _items = [new ListItem(new NoOpCommand()) { Title = "入力が長すぎます", Subtitle = "500 文字以内で入力してください" }];
+            _items = [new ListItem(new NoOpCommand()) { Title = "入力が長すぎます", Subtitle = $"500 文字以内で入力してください | {Attribution}" }];
         }
         else
         {
             IsLoading = true;
-            _items = [new ListItem(new NoOpCommand()) { Title = "翻訳中…", Subtitle = $"{request.Source} → {request.Target}" }];
-            _ = TranslateAsync(request, version);
+            _items = [new ListItem(new NoOpCommand()) { Title = "辞書を検索中…", Subtitle = Attribution }];
+            _ = LookupAsync(request, version);
         }
 
         RaiseItemsChanged();
     }
 
-    private async Task TranslateAsync(TranslationRequest request, int version)
+    private async Task LookupAsync(TranslationRequest request, int version)
     {
         await Task.Delay(350);
         if (version != Volatile.Read(ref _queryVersion))
@@ -57,17 +58,25 @@ internal sealed partial class TranslatorCmdPalExtensionPage : DynamicListPage
         IListItem[] items;
         try
         {
-            var translation = await Task.Run(() => TranslationClient.Translate(request));
-            items = [new ListItem(new CopyTextCommand(translation))
+            var entries = await Task.Run(() => DictionaryClient.Lookup(request));
+            items = entries.Select(entry =>
             {
-                Title = translation,
-                Subtitle = $"{request.Source} → {request.Target} | Enter でコピー",
-            }];
+                var result = request.Target == "en" ? entry.Meaning : entry.Headword;
+                return (IListItem)new ListItem(new CopyTextCommand(result))
+                {
+                    Title = $"{entry.Headword}【{entry.Reading}】",
+                    Subtitle = $"{entry.Meaning} | Enter でコピー | {Attribution}",
+                };
+            }).ToArray();
+            if (items.Length == 0)
+            {
+                items = [new ListItem(new NoOpCommand()) { Title = "該当する単語がありません", Subtitle = $"文章翻訳・活用形の解析には対応していません | {Attribution}" }];
+            }
         }
-        catch (Exception ex) when (ex is IOException or OperationCanceledException or System.Text.Json.JsonException or InvalidOperationException or System.ComponentModel.Win32Exception)
+        catch (Exception ex) when (ex is IOException or InvalidDataException or System.Xml.XmlException or InvalidOperationException or UnauthorizedAccessException)
         {
-            System.Diagnostics.Trace.TraceError($"Translator request failed: {ex}");
-            items = [new ListItem(new NoOpCommand()) { Title = "翻訳できませんでした", Subtitle = ex.Message }];
+            System.Diagnostics.Trace.TraceError($"Dictionary lookup failed: {ex}");
+            items = [new ListItem(new NoOpCommand()) { Title = "辞書を検索できませんでした", Subtitle = $"{ex.Message} | {Attribution}" }];
         }
 
         if (version == Volatile.Read(ref _queryVersion))
